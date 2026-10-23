@@ -13,13 +13,18 @@ const FoldModel=(()=>{
  const phaseText=(n,p)=>{if(p<=0)return 'Folded · ready to cut';if(p>=1)return 'Open · every cut repeated';const i=Math.min(3,Math.floor(p*4));return n===12?['1 / Last half fold','2 / First third opens','3 / Second third opens','4 / First half fold'][i]:['1 / Last half fold','2 / Next half fold','3 / Next half fold','4 / First half fold'][i]};
  function edge(n,side,t,depth=0){const a=Math.PI/n;return [Math.cos(a)*t,side*(Math.sin(a)*t-depth)]}
  function coords(n,side,p){const a=Math.PI/n,t=p[0]/Math.cos(a);return {t,depth:Math.sin(a)*t-side*p[1]}}
- function angular(n,side,points){if(points.length<3||points.length>4)return {ok:false,reason:'Use one or two inner corners.'};const c=points.map(p=>coords(n,side,p)),span=c.at(-1).t-c[0].t,dir=Math.sign(span);
-  if(Math.abs(span)<.055||Math.abs(span)>.34)return {ok:false,reason:'Return to the same edge, a little farther along (up to a third of its length).'};
-  if(c.some(v=>v.t<.09||v.t>(side===1?Math.cos(2*Math.PI/n):1)-.045))return {ok:false,reason:'Leave a little paper at the tip and outer corner.'};
-  if(Math.abs(c[0].depth)>.008||Math.abs(c.at(-1).depth)>.008)return {ok:false,reason:'Finish on the same long edge.'};
-  for(let i=1;i<c.length-1;i++)if((c[i].t-c[i-1].t)*dir<.012||(c.at(-1).t-c[i].t)*dir<.012||c[i].depth<.016||c[i].depth>1.45*Math.sin(Math.PI/n)*c[i].t)return {ok:false,reason:'Keep the corners moving along the edge, leaving the opposite fold intact.'};
+ const turn=(a,b,c)=>(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);
+ function intersects(a,b,c,d){const t=[turn(a,b,c),turn(a,b,d),turn(c,d,a),turn(c,d,b)];return t[0]*t[1]<=1e-12&&t[2]*t[3]<=1e-12&&Math.max(Math.min(a[0],b[0]),Math.min(c[0],d[0]))<=Math.min(Math.max(a[0],b[0]),Math.max(c[0],d[0]))+1e-8&&Math.max(Math.min(a[1],b[1]),Math.min(c[1],d[1]))<=Math.min(Math.max(a[1],b[1]),Math.max(c[1],d[1]))+1e-8}
+ function crossesPath(points,next){for(let i=0;i<points.length-2;i++)if(intersects(points.at(-1),next,points[i],points[i+1]))return true;return false}
+ function angular(n,side,points){if(points.length<3||points.length>6)return {ok:false,reason:'Use one to four corners, then finish on the green edge.'};const c=points.map(p=>coords(n,side,p));
+  if(Math.abs(c.at(-1).t-c[0].t)<.02)return {ok:false,reason:'Finish a little farther from the starting dot.'};
+  if(Math.abs(c[0].depth)>.008||Math.abs(c.at(-1).depth)>.008)return {ok:false,reason:'Finish on the green edge.'};
+  const a=Math.PI/n,w=[[0,0],[Math.cos(a),-Math.sin(a)],[Math.cos(2*a)*Math.cos(a),Math.cos(2*a)*Math.sin(a)]];
+  for(let i=0;i<points.length;i++)if(w.some((p,j)=>turn(p,w[(j+1)%3],points[i])< -1e-8))return {ok:false,reason:'Keep the corners inside the paper.'};
+  for(let i=1;i<points.length-1;i++)if(c[i].depth<.004)return {ok:false,reason:'Place a corner inside the paper, or click the green edge to finish.'};
+  for(let i=0;i<points.length;i++)for(let j=i+1;j<points.length;j++){if(j===i+1||(i===0&&j===points.length-1))continue;if(intersects(points[i],points[(i+1)%points.length],points[j],points[(j+1)%points.length]))return {ok:false,reason:'That line crosses the cut. Try another point or go back one point.'}}
   return {ok:true};
  }
- return {identity,multiply,apply,hinge,packets,matrix,scene,phaseText,edge,coords,angular};
+ return {identity,multiply,apply,hinge,packets,matrix,scene,phaseText,edge,coords,angular,crossesPath};
 })();
 if(typeof module!=='undefined')module.exports=FoldModel;
