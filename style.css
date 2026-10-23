@@ -37,3 +37,27 @@
 }
 
 .toolbar .primary .action-label{font-size:12px;font-weight:600;white-space:nowrap}
+
+/* Keep five meaningful choices visible; don't shrink touch targets to fit diagrams. */
+header{justify-content:space-between;gap:8px}.brand{flex-shrink:0}
+header .source{position:static;margin:0;font-size:11px;white-space:nowrap}
+header .source a{display:flex;align-items:center;min-height:44px;padding:4px;color:#718068}
+@media(max-width:650px){
+ .presets{grid-template-columns:repeat(5,minmax(0,1fr));gap:3px}
+ .topbar .preset{height:44px;min-width:44px;max-width:none;padding:4px 2px;font-size:10.5px;line-height:14px}
+ .preset-diagram{display:block}
+ header .source{font-size:10px}
+}
+@media(max-height:500px) and (max-width:1000px) and (orientation:landscape){
+ header{height:44px;flex-basis:44px}
+ .presets{display:grid;grid-template-columns:repeat(5,minmax(44px,1fr));width:100%;padding-right:0;border-right:0}
+ .topbar{display:grid;grid-template-columns:1fr;gap:4px;min-height:0;padding-top:4px;padding-bottom:4px}
+ .topbar .preset{width:100%;max-width:none;height:44px;padding:4px;font-size:11px}.preset-diagram{display:block}
+ .cut-tools{grid-column:1;justify-self:center;margin:0;padding:2px}.cut-tools button{height:44px}
+}
+
+/* One filled paper silhouette and one short label at every viewport. */
+.preset-diagram{display:block;width:28px;height:28px;flex:none}
+.topbar .preset{gap:2px}
+@media(max-width:650px){.topbar .preset{height:52px}.preset-diagram{width:24px;height:24px}}
+@media(max-height:500px) and (max-width:1000px) and (orientation:landscape){.topbar .preset{height:48px}.preset-diagram{width:24px;height:24px}}

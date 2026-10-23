@@ -14,8 +14,13 @@ const Geometry = (() => {
  }
  const area=p=>Math.abs(p.reduce((s,a,i)=>{const b=p[(i+1)%p.length];return s+a[0]*b[1]-a[1]*b[0]},0)/2);
  const wedge=n=>{const a=Math.PI/n;return [[0,0],[Math.cos(a),-Math.sin(a)],[Math.cos(2*a)*Math.cos(a),Math.cos(2*a)*Math.sin(a)]]};
+ // Circular paper is a sampled sector inside the same physical fold.
+ function outline(n,kind='polygon'){
+  if(kind==='circle'){const a=Math.PI/n;return [[0,0],...Array.from({length:65},(_,i)=>{const angle=-a+2*a*i/64;return [.84*Math.cos(angle),.84*Math.sin(angle)]})]}
+  return wedge(n);
+ }
  const transform=(p,k,n)=>{const a=-Math.PI/2+Math.PI/n+k*2*Math.PI/n,y=p[1]*(k%2?-1:1);return [p[0]*Math.cos(a)-y*Math.sin(a),p[0]*Math.sin(a)+y*Math.cos(a)]};
  const inside=(p,poly)=>poly.every((a,i)=>cross(a,poly[(i+1)%poly.length],p)>=-1e-8);
- return {clip,area,wedge,transform,inside};
+ return {clip,area,wedge,outline,transform,inside};
 })();
 if(typeof module!=='undefined')module.exports=Geometry;

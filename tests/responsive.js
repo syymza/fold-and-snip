@@ -4,18 +4,23 @@ frame.onload=async()=>{
  const checks=[],assert=(condition,name)=>{if(!condition)throw Error(name);checks.push(name)},win=frame.contentWindow,doc=frame.contentDocument,click=selector=>doc.querySelector(selector).click();
  const settle=()=>new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(()=>setTimeout(resolve,40))));
  const layout=name=>{
+  assert(doc.querySelectorAll('[data-preset]').length===5,name+': exactly five papers');
+  assert(!!doc.querySelector('#source a'),name+': source credit stays visible on every paper');
+  if(doc.querySelector('#source a')){const link=doc.querySelector('#source a'),r=link.getBoundingClientRect(),header=doc.querySelector('header').getBoundingClientRect();assert(link.textContent==='Inspired by NASA'&&r.top>=header.top&&r.bottom<=header.bottom+1&&r.height>=44,name+': NASA credit stays in header with adequate target')}
   const stage=doc.querySelector('#stage').getBoundingClientRect(),buttons=[...doc.querySelectorAll('.topbar button,.toolbar button')].filter(b=>b.getClientRects().length),bounds=buttons.map(b=>b.getBoundingClientRect());
   assert(doc.documentElement.scrollHeight<=win.innerHeight+1&&doc.documentElement.scrollWidth<=win.innerWidth+1,name+': no page scrolling');
   assert(bounds.every(r=>r.left>=0&&r.right<=win.innerWidth+1&&r.top>=0&&r.bottom<=win.innerHeight+1),name+': all controls inside viewport');
   assert(bounds.every(r=>r.width>=44&&r.height>=44),name+': button targets remain at least 44px');
   assert(stage.height>=120&&doc.querySelector('.toolbar').getBoundingClientRect().top>=stage.bottom-1,name+': usable paper and separate toolbar');
-  const arrows=[...doc.querySelectorAll('.fold-arrow')].map(e=>e.getBoundingClientRect()),labels=[...doc.querySelectorAll('.preset>span:last-child')].map(e=>e.getBoundingClientRect());
-  assert(arrows.every(r=>Math.abs(r.top-arrows[0].top)<.1)&&labels.every(r=>Math.abs(r.bottom-labels[0].bottom)<.1),name+': arrows and label baselines align');
+  const icons=[...doc.querySelectorAll('.preset-diagram')].map(e=>e.getBoundingClientRect()),labels=[...doc.querySelectorAll('.preset>span:last-child')].map(e=>e.getBoundingClientRect());
+  assert(icons.length===5&&icons.every(r=>r.width>=24&&r.height>=24),name+': all five silhouettes stay visible');
+  assert(icons.every((r,i)=>Math.abs(r.top-icons[0].top)<.1&&r.bottom<=labels[i].top+.1&&Math.abs((r.left+r.right-labels[i].left-labels[i].right)/2)<.1)&&labels.every(r=>Math.abs(r.bottom-labels[0].bottom)<.1),name+': icon centers and label baselines align');
+
  };
  try{
   for(const [width,height] of [[493,801],[390,664],[320,568],[844,390]]){
    frame.style.width=width+'px';frame.style.height=height+'px';await settle();
-   for(const preset of ['snow','rosette','webb']){
+   for(const preset of ['snow','rosette','webb','square','circle']){
     click('[data-preset="'+preset+'"]');await settle();layout(width+'×'+height+' '+preset);
     click('#angularMode');click('#guided');await settle();assert(win.foldSnip.getState().draft?.valid,width+'×'+height+' '+preset+': valid preview');layout(width+'×'+height+' '+preset+' confirmation');
     click('#commitCut');click('#reveal');await new Promise(resolve=>setTimeout(resolve,1100));assert(win.foldSnip.getState().progress===1,width+'×'+height+' '+preset+': reveal completed');layout(width+'×'+height+' '+preset+' revealed');

@@ -6,11 +6,11 @@ const FoldModel=(()=>{
  function hinge(axis,angle){const x=Math.cos(axis),y=Math.sin(axis),c=Math.cos(angle),s=Math.sin(angle),t=1-c;return [c+x*x*t,x*y*t,y*s,x*y*t,c+y*y*t,-x*s,-y*s,x*s,c]}
  function packets(n){const a=Math.PI/n,base=[[],[{axis:a,phase:0}]];
   if(n===12){const half=[...base,...base.map(p=>[{axis:-a,phase:1},...p]),...base.map(p=>[{axis:3*a,phase:2},...p])];return [...half,...half.map(p=>[{axis:7*a,phase:3},...p])];}
-  let leaves=base;for(const [phase,axis] of [[1,-a],[2,3*a],[3,-5*a]])leaves=[...leaves,...leaves.map(p=>[{axis,phase},...p])];return leaves;
+  let leaves=base;for(const [phase,axis] of (n===8?[[1,-a],[2,3*a]]:[[1,-a],[2,3*a],[3,-5*a]]))leaves=[...leaves,...leaves.map(p=>[{axis,phase},...p])];return leaves;
  }
- function matrix(ops,progress){let m=identity();for(const op of ops){const f=Math.max(0,Math.min(1,progress*4-op.phase));m=multiply(m,hinge(op.axis,Math.PI*f));}return m}
- const scene=(n,progress)=>packets(n).map(ops=>({ops,matrix:matrix(ops,progress)}));
- const phaseText=(n,p)=>{if(p<=0)return 'Folded · ready to cut';if(p>=1)return 'Open · every cut repeated';const i=Math.min(3,Math.floor(p*4));return n===12?['1 / Last half fold','2 / First third opens','3 / Second third opens','4 / First half fold'][i]:['1 / Last half fold','2 / Next half fold','3 / Next half fold','4 / First half fold'][i]};
+ function matrix(ops,progress,stages=4){let m=identity();for(const op of ops){const f=Math.max(0,Math.min(1,progress*stages-op.phase));m=multiply(m,hinge(op.axis,Math.PI*f));}return m}
+ const scene=(n,progress)=>packets(n).map(ops=>({ops,matrix:matrix(ops,progress,n===8?3:4)}));
+ const phaseText=(n,p)=>{if(p<=0)return 'Folded · ready to cut';if(p>=1)return 'Open · every cut repeated';const stages=n===8?3:4,i=Math.min(stages-1,Math.floor(p*stages));if(n===8)return ['1 / Diagonal fold opens','2 / Next half fold','3 / First half fold'][i];return n===12?['1 / Last half fold','2 / First third opens','3 / Second third opens','4 / First half fold'][i]:['1 / Last half fold','2 / Next half fold','3 / Next half fold','4 / First half fold'][i]};
  function edge(n,side,t,depth=0){const a=Math.PI/n;return [Math.cos(a)*t,side*(Math.sin(a)*t-depth)]}
  function coords(n,side,p){const a=Math.PI/n,t=p[0]/Math.cos(a);return {t,depth:Math.sin(a)*t-side*p[1]}}
  const turn=(a,b,c)=>(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);
