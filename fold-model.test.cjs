@@ -1,9 +1,15 @@
 const assert=require('node:assert/strict'),F=require('./fold-model.js'),G=require('./geometry.js');
 const distance=(a,b)=>Math.hypot(...a.map((x,i)=>x-b[i]));
-for(const n of [12,16]){
+for(const n of [8,12,16]){
  const wedge=G.wedge(n),a=-Math.PI/2+Math.PI/n,root=p=>[Math.cos(a)*p[0]-Math.sin(a)*p[1],Math.sin(a)*p[0]+Math.cos(a)*p[1]];
+ const leaves=F.scene(n,1);
+ assert.equal(leaves.length,n,'exact physical panel count');
+ const unique=new Set(leaves.map(l=>l.matrix.map(v=>Math.abs(v)<1e-10?'0':v.toFixed(8)).join(',')));
+ assert.equal(unique.size,n,'no duplicated open panels');
  const expected=Array.from({length:n},(_,k)=>wedge.map(p=>G.transform(p,k,n)));
- for(const leaf of F.scene(n,1)){
+ const opened=leaves.map(l=>wedge.map(p=>root(F.apply(l.matrix,p))));
+ for(let i=0;i<n;i++)for(let j=0;j<i;j++)assert(G.area(G.clip(opened[i],opened[j]))<1e-10,'panels tile without overlap');
+ for(const leaf of leaves){
   const points=wedge.map(p=>root(F.apply(leaf.matrix,p)));
   assert(expected.some(poly=>points.every((p,i)=>distance(p,poly[i])<1e-10)),'fully open panel matches prior geometry');
  }
