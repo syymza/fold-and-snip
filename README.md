@@ -8,11 +8,11 @@ A small paper-cutting playground. Fold virtual paper, make a few cuts, and pull 
 
 - Pick Snow flower, Garden rosette, or A little Webb.
 - **Quick V snip:** drag inward from a long paper edge and release.
-- **Angular cut:** tap an edge, place one or two inner corners, and return to that same edge. Preview the warm scrap, then choose **Cut piece** or **Cancel**.
-- Pull the **Folded–Open** slider to unfold or refold, pausing anywhere. Fold fully before cutting again.
+- **Angular cut:** click a green edge, place up to four inner corners, and return to that same green edge. Preview the warm scrap, then choose **Cut piece** or **Cancel**.
+- Choose **Reveal pattern** for the surprise, then **Fold & keep cutting** to add more cuts.
 - Undo restores the last cut. New paper resets the selected preset. Changing presets starts fresh.
 
-The guided cut button and Enter/Space on the focused paper provide keyboard alternatives. Angular examples still require confirmation. Escape cancels a preview. The unfold slider supports arrow keys, Page Up/Down, Home and End. Reduced motion skips automatic transitions while retaining manual control.
+The guided cut button and Enter/Space on the focused paper provide keyboard alternatives. Angular examples still require confirmation. Escape cancels a preview. Backspace on the focused paper removes the last point, and **Back a point** reopens a scrap preview without discarding the shape. Reduced motion reveals or refolds the paper instantly.
 
 ## Run locally
 
@@ -40,15 +40,22 @@ With Node.js installed:
 node --check app.js
 node geometry.test.cjs
 node fold-model.test.cjs
+node angular.test.cjs
 node scripts/build.mjs
 ```
 
-The geometry tests cover sheet area, reflection seams, source-mask bounds, fully folded and unfolded endpoints, rigid panel lengths at intermediate positions, fixed crease axes and angular-path bounds. Local browser QA before publication included 56 cross-preset interaction assertions plus real pointer/keyboard interactions and visual inspection at desktop, 390px and 320px widths. Physical touch hardware and Safari/Firefox have not been tested.
+The geometry tests cover sheet area, reflection seams, source-mask bounds, fully folded and unfolded endpoints, rigid panel lengths at intermediate positions, fixed crease axes and angular-path bounds. The browser regression runner checks 54 interaction and rendering assertions, including exact preview/committed-mask equality. Real pointer/keyboard interactions and visual inspection were also completed at desktop, 390px and 320px widths. Physical touch hardware and Safari/Firefox have not been tested.
 
 GitHub Actions runs these checks on pull requests. On `main`, Pages deploys an explicit allowlist of the six runtime files plus `.nojekyll` and a generated `version.json` identifying the deployed commit. Tests, documentation, local source material and screenshots are not part of the deployed artifact.
 
 ## Prototype bounds
 
-Cuts are bounded V notches or short same-edge angular paths with one or two inner corners. They are placed with taps/clicks rather than a freehand stroke. A 300 × 175 raster material check rejects empty cuts, multiple scraps and newly disconnected paper components; tiny raster components are ignored, so this is not an exact vector topology proof. Some cuts on the narrow Webb lattice are intentionally rejected.
+Cuts are bounded V notches or short same-edge angular paths with up to four inner corners. They are placed with taps/clicks rather than a freehand stroke. Green edge targets and point markers show valid input. Invalid clicks show a red marker and keep placed points. Full instructions and rejection reasons are available through accessible names and screen-reader status; hover hints explain the icon controls. A 300 × 175 raster material check rejects empty cuts, multiple scraps and newly disconnected paper components; tiny raster components are ignored, so this is not an exact vector topology proof. Some cuts on the narrow Webb lattice are intentionally rejected.
 
 There is no thickness/collision or fragment-physics simulation, persistence, export, audio, or undo history across preset switches. Colour choices are hidden in the compact phone layout. No backend or paid services are required.
+
+## Interaction regression preview
+
+Run the local server and open `tests/browser.html` for browser checks covering direction-changing paths, visible rejection, retained points after interruptions, point recovery, exact preview/commit mask consistency, simple reveal/fold, undo/reset and keyboard alternatives. Synthetic pointer events are used in this runner; real desktop and narrow-layout pointer testing is a separate verification step. Test files are excluded from the Pages artifact.
+
+The interface keeps visible text to the wordmark, a cut count and a quiet Webb source link. The paper occupies the main canvas; presets, scissors and actions use icon controls with accessible names. There is no manual unfolding slider or persistent explanatory copy.
