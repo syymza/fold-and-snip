@@ -10,6 +10,15 @@ const sample=document.createElement('canvas');sample.width=300;sample.height=175
 function path(c,p){c.beginPath();p.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath()}
 function localPath(c,p){path(c,p.map(([x,y])=>[50+x*1000,350+y*1000]))}
 function basePolys(){const w=Geometry.wedge(presets[key].n);return key==='webb'?WEBB_POLYGONS.map(p=>Geometry.clip(p,w)).filter(p=>p.length>2):[w]}
+// Show the real uncut sheet and the folded material, using the canvas geometry.
+function presetDiagrams(){
+ const d=poly=>'M'+poly.map(p=>p.join(',')).join('L')+'Z';
+ document.querySelectorAll('[data-preset]').forEach(button=>{
+  const preset=button.dataset.preset,n=presets[preset].n,w=Geometry.wedge(n),polys=preset==='webb'?WEBB_POLYGONS.map(p=>Geometry.clip(p,w)).filter(p=>p.length>2):[w],holes=preset==='webb'?WEBB_HOLES:[],id='preset-material-'+preset;
+  const material=polys.map(p=>`<path d="${d(p)}"/>`).join(''),open=Array.from({length:n},(_,k)=>`<use href="#${id}" transform="matrix(${[...Geometry.transform([1,0],k,n),...Geometry.transform([0,1],k,n),0,0].join(' ')})"/>`).join('');
+  button.querySelector('.preset-diagram').innerHTML=`<svg viewBox="0 0 86 34" focusable="false"><defs><mask id="${id}-mask" maskUnits="userSpaceOnUse" x="-.1" y="-.4" width="1.3" height=".8"><path fill="white" d="M-.1-.4H1.2V.4H-.1Z"/>${holes.map(p=>`<path fill="black" d="${d(p)}"/>`).join('')}</mask><g id="${id}" mask="url(#${id}-mask)">${material}</g></defs><g class="sheet-mini" transform="translate(17 17) scale(14)" fill="currentColor" fill-opacity=".13" stroke="currentColor" stroke-width=".035" stroke-linejoin="round">${open}</g><path class="fold-arrow" d="M37 17H47m-4-4 4 4-4 4"/><g transform="translate(53 17) scale(29)" fill="#eee4cd" stroke="currentColor" stroke-width=".04" stroke-linejoin="round"><use href="#${id}"/></g></svg>`;
+ });
+}
 function paintPaper(c,extra=[]){c.clearRect(0,0,1200,700);c.globalCompositeOperation='source-over';c.fillStyle=color;basePolys().forEach(p=>{localPath(c,p);c.fill()});c.globalCompositeOperation='destination-out';if(key==='webb')WEBB_HOLES.forEach(p=>{localPath(c,p);c.fill()});[...cuts,...extra].forEach(p=>{localPath(c,p);c.fill()});c.globalCompositeOperation='source-atop';const gradient=c.createLinearGradient(0,70,0,600);gradient.addColorStop(0,'#ffffff35');gradient.addColorStop(1,'#4d45321c');c.fillStyle=gradient;c.fillRect(0,0,1200,700);c.strokeStyle='#6d5f401a';c.lineWidth=2;localPath(c,Geometry.wedge(presets[key].n));c.stroke();c.globalCompositeOperation='source-over'}
 function buildBuffer(){paintPaper(bc);materialBytes=bc.getImageData(0,0,1200,700).data}
 function layout(){const r=canvas.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);canvas.width=r.width*dpr;canvas.height=r.height*dpr;dimensions={w:r.width,h:r.height,dpr};draw()}
@@ -66,6 +75,7 @@ $('#reset').onclick=reset;
 document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{key=b.dataset.preset;document.querySelectorAll('[data-preset]').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',String(x===b))});document.body.classList.toggle('webb',key==='webb');$('#source').innerHTML=key==='webb'?'<a target="_blank" rel="noopener" href="https://science.nasa.gov/asset/webb/webb-mirror-paper-snowflake-activity/" title="Webb paper snowflake · NASA, ESA, CSA, Leah Hustak (STScI). Independent adaptation; no endorsement." aria-label="Webb paper snowflake source. NASA, ESA, CSA, Leah Hustak, STScI. Independent adaptation; no endorsement.">Webb ↗</a>':'';reset()});
 document.querySelectorAll('[data-color]').forEach(b=>b.onclick=()=>{color=b.dataset.color;document.querySelectorAll('[data-color]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b))});buildBuffer();draw()});
 
+presetDiagrams();
 new ResizeObserver(layout).observe($('#stage'));buildBuffer();update();layout();announce('Drag inward from a marked edge. Release to snip.');
 window.foldSnip={getState:()=>({preset:key,mode,cuts:cuts.map(p=>p.map(v=>[...v])),progress,n:presets[key].n,draft:draft?JSON.parse(JSON.stringify(draft)):null,animating:!!animation}),toScreen:p=>{const m=projection(FoldModel.identity());return [camera.x+camera.scale*(m[0]*p[0]+m[2]*p[1]),camera.y+camera.scale*(m[1]*p[0]+m[3]*p[1])]},assess,materialMask:()=>Array.from(sampleMask()),previewMask:()=>draft?.poly?maskFor(draft.poly):null};
 

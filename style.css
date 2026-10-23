@@ -5,3 +5,7 @@
 /* Keep labeled controls visible when the narrow topbar wraps. */
 @media(max-width:650px){.topbar{height:auto;min-height:68px;row-gap:6px;padding-top:8px;padding-bottom:8px}.history button span{color:inherit;margin:0}.toolbar .primary{flex-shrink:0}.primary .action-label{white-space:nowrap}}
 @media(max-width:359px){.topbar{justify-content:center}.cut-tools{margin-left:0}.toolbar:has(.draft-actions:not([hidden])){justify-content:center}.toolbar:has(.draft-actions:not([hidden])) .draft-actions{margin-left:0}}
+
+/* Geometry-based paper → folded-wedge selectors share fixed alignment boxes. */
+.topbar .preset{width:92px;height:58px;padding:4px;display:flex;flex-direction:column;justify-content:center;gap:1px;font-size:11px;line-height:14px;color:#718068;flex-shrink:0}.preset-diagram{display:block;width:78px;height:31px}.preset-diagram svg{display:block;width:100%;height:100%}.fold-arrow{fill:none;stroke:currentColor;stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round}.topbar{height:auto;min-height:79px;padding-top:8px;padding-bottom:8px;flex-wrap:wrap;row-gap:7px}.source{position:static}
+@media(max-width:650px){.topbar{justify-content:center;column-gap:6px}.presets{width:100%;justify-content:center;border-right:0;padding-right:0;gap:3px}.topbar .preset{width:86px;height:57px}.cut-tools{margin-left:auto}.source{font-size:9px;margin-right:auto}.source:empty{display:none}}
