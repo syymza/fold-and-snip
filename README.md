@@ -8,7 +8,7 @@ A small paper-cutting playground. Fold virtual paper, make a few cuts, and pull 
 
 - Pick Snow flower, Garden rosette, or A little Webb.
 - **Quick V snip:** drag inward from a long paper edge and release.
-- **Angular cut:** click a green edge, place up to four inner corners, and return to that same green edge. Preview the warm scrap, then choose **Cut piece** or **Cancel**.
+- **Angular cut:** click a marked edge, place up to four inner corners, and return to that same marked edge. Preview the shaded scrap in place, then choose **Cut piece** or **Cancel**.
 - Choose **Reveal pattern** for the surprise, then **Fold & keep cutting** to add more cuts.
 - Undo restores the last cut. New paper resets the selected preset. Changing presets starts fresh.
 
@@ -50,7 +50,7 @@ GitHub Actions runs these checks on pull requests. On `main`, Pages deploys an e
 
 ## Prototype bounds
 
-Cuts are bounded V notches or short same-edge angular paths with up to four inner corners. They are placed with taps/clicks rather than a freehand stroke. Green edge targets and point markers show valid input. Invalid clicks show a red marker and keep placed points. Full instructions and rejection reasons are available through accessible names and screen-reader status; hover hints explain the icon controls. A 300 × 175 raster material check rejects empty cuts, multiple scraps and newly disconnected paper components; tiny raster components are ignored, so this is not an exact vector topology proof. Some cuts on the narrow Webb lattice are intentionally rejected.
+Cuts are bounded V notches or short same-edge angular paths with up to four inner corners. They are placed with taps/clicks rather than a freehand stroke. Muted edge targets and point markers show valid input. Invalid clicks show a red marker and keep placed points. Full instructions and rejection reasons are available through accessible names and screen-reader status; hover hints explain the icon controls. A 300 × 175 raster material check rejects empty cuts, multiple scraps and newly disconnected paper components; tiny raster components are ignored, so this is not an exact vector topology proof. Some cuts on the narrow Webb lattice are intentionally rejected.
 
 There is no thickness/collision or fragment-physics simulation, persistence, export, audio, or undo history across preset switches. Colour choices are hidden in the compact phone layout. No backend or paid services are required.
 
@@ -58,4 +58,4 @@ There is no thickness/collision or fragment-physics simulation, persistence, exp
 
 Run the local server and open `tests/browser.html` for browser checks covering direction-changing paths, visible rejection, retained points after interruptions, point recovery, exact preview/commit mask consistency, simple reveal/fold, undo/reset and keyboard alternatives. Synthetic pointer events are used in this runner; real desktop and narrow-layout pointer testing is a separate verification step. Test files are excluded from the Pages artifact.
 
-The interface keeps visible text to the wordmark, a cut count and a quiet Webb source link. The paper occupies the main canvas; presets, scissors and actions use icon controls with accessible names. There is no manual unfolding slider or persistent explanatory copy.
+The interface uses short labels beside the scissors and action icons, with a cut count and a quiet Webb source link. Ivory paper and thin muted edge guides keep attention on the canvas; a finished shape shades the exact scrap in place before confirmation. Presets retain icon controls with accessible names. There is no manual unfolding slider or persistent explanatory copy.
